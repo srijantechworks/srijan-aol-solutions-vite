@@ -132,7 +132,7 @@ export default function DesktopSidebar({
             {/* TOP */}
             <div
                 className={`
-        flex items-center pb-5
+        flex items-center pb-5 mt-2
         ${isCollapsed ? 'px-1.5' : 'justify-between px-1.5'}
     `}
             >

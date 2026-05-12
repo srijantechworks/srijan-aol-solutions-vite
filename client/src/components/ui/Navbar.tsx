@@ -11,11 +11,14 @@ import {
     Infinity,
     ChevronRight,
     ChevronLeft,
-    Globe
+    Globe,
+    Languages,
+    ChevronDown
 } from 'lucide-react'
 
 import { useCountry } from "../../context/CountryContext"
 import { countries } from '../../constants/countries.ts'
+import { languages } from '../../constants/languages.ts'
 
 interface Props {
     isSidebarCollapsed: boolean
@@ -28,10 +31,16 @@ export default function Navbar({
     const navigate = useNavigate()
 
     const [isMenuOpen, setIsMenuOpen] = useState(false)
-    // New State: Tracks which nested menu is currently visible
-    const [activeView, setActiveView] = useState<'main' | 'region'>('main')
+    const [activeView, setActiveView] = useState<'main' | 'region' | 'language'>('main')
+
+    // Desktop Language Menu State
+    const [isDesktopLangOpen, setIsDesktopLangOpen] = useState(false)
+
+    // Temporary Local State for Language
+    const [language, setLanguage] = useState('en')
 
     const menuRef = useRef<HTMLDivElement>(null)
+    const desktopLangRef = useRef<HTMLDivElement>(null)
 
     const isAboutPage = location.pathname === '/about'
     const { country, setCountry } = useCountry()
@@ -91,10 +100,15 @@ export default function Navbar({
 
     useEffect(() => {
         const handleOutsideClick = (event: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+            const target = event.target as Node;
+
+            if (menuRef.current && !menuRef.current.contains(target)) {
                 setIsMenuOpen(false)
-                // Reset back to main view so it's fresh the next time it's opened
                 setTimeout(() => setActiveView('main'), 200)
+            }
+
+            if (desktopLangRef.current && !desktopLangRef.current.contains(target)) {
+                setIsDesktopLangOpen(false)
             }
         }
 
@@ -110,13 +124,14 @@ export default function Navbar({
     transition-all duration-300 ease-out
 
     left-0 px-5 py-3
+    md:px-6 md:py-4 /* FIX: Padding is now permanently fixed for desktop */
     bg-black/20
     backdrop-blur-xl
 
     ${
                 isSidebarCollapsed
-                    ? 'md:left-[80px] md:px-4 md:py-3 md:bg-transparent md:backdrop-blur-none'
-                    : 'md:left-[255px] md:px-6 md:py-4 md:bg-black/5 md:backdrop-blur-xl'
+                    ? 'md:left-[80px] md:bg-transparent md:backdrop-blur-none'
+                    : 'md:left-[255px] md:bg-black/5 md:backdrop-blur-xl'
             }
 `}
         >
@@ -154,64 +169,126 @@ export default function Navbar({
     </span>
             </Link>
 
-            {/* ABOUT BUTTON */}
-            <div className="hidden md:block">
+
+            {/* ============================================== */}
+            {/* DESKTOP RIGHT SECTION (Language + About) */}
+            {/* ============================================== */}
+            <div className="hidden md:flex items-center gap-3 md:gap-4">
+
+                {/* 1. DESKTOP LANGUAGE SELECTOR */}
+                <div className="relative" ref={desktopLangRef}>
+                    <button
+                        onClick={() => setIsDesktopLangOpen(!isDesktopLangOpen)}
+                        className={`
+                            pointer-events-auto cursor-pointer
+                            flex items-center justify-center gap-2
+                            h-10 px-4 rounded-xl
+                            border border-white/10 backdrop-blur-md
+                            transition-all active:scale-[0.96] shadow-sm
+                            ${isDesktopLangOpen ? 'bg-black/40' : 'bg-black/20 hover:bg-black/40'}
+                        `}
+                    >
+                        <Languages size={18} className="text-white/70 shrink-0" />
+
+                        <span className="text-sm font-semibold tracking-tight text-white uppercase">
+                            {language}
+                        </span>
+
+                        <ChevronDown
+                            size={16}
+                            className={`text-white/50 shrink-0 transition-transform duration-300 ${isDesktopLangOpen ? 'rotate-180' : ''}`}
+                        />
+                    </button>
+
+                    {/* DESKTOP DROPDOWN MENU */}
+                    {isDesktopLangOpen && (
+                        <div
+                            className="
+                                absolute right-0 top-[calc(100%+8px)] z-[999]
+                                flex w-[220px] flex-col overflow-hidden
+                                rounded-xl text-sm cursor-pointer
+                                border border-white/10 bg-[#1a1a1a]/95
+                                shadow-[0_8px_30px_rgb(0,0,0,0.6)]
+                                backdrop-blur-2xl
+                            "
+                        >
+                            <div className="px-4 py-2 border-b border-white/5 bg-white/5">
+                                <span className="text-[11px] font-bold text-white/40 uppercase tracking-wider">
+                                    Select Language
+                                </span>
+                            </div>
+
+                            <div className="flex flex-col p-1 max-h-[300px] cursor-pointer overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">
+                                {languages.map((item) => {
+                                    const active = language === item.id
+                                    return (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => {
+                                                setLanguage(item.id)
+                                                setIsDesktopLangOpen(false)
+                                            }}
+                                            className={`
+                                                flex items-center justify-between w-full
+                                                px-3 py-2.5 rounded-lg
+                                                transition-all duration-200 cursor-pointer
+                                                ${active ? 'bg-white/10' : 'hover:bg-white/5'}
+                                            `}
+                                        >
+                                            <span
+                                                className={`
+                                                    text-sm tracking-tight flex items-center gap-2
+                                                    ${active ? 'text-amber-400 font-bold' : 'text-white/80 font-medium'}
+                                                `}
+                                            >
+                                                {item.label}
+                                                <span className="opacity-50 text-xs font-normal">
+                                                    ({item.native})
+                                                </span>
+                                            </span>
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* 2. DESKTOP ABOUT BUTTON */}
                 <button
                     onClick={handleAboutToggle}
                     className={`
-    pointer-events-auto
-    flex items-center justify-center
-    cursor-pointer gap-2
-
-    rounded-full
-    w-11 h-11
-
-    shadow-lg
-    backdrop-blur-xl
-    transition-all
-    active:scale-[0.96]
-
-    ${
+                        pointer-events-auto cursor-pointer
+                        flex items-center justify-center gap-2
+                        h-10 w-11 md:w-auto md:px-4 rounded-full md:rounded-xl
+                        border border-white/10 backdrop-blur-md
+                        transition-all active:scale-[0.96] shadow-sm
+                        
+                        ${
                         isAboutPage
-                            ? 'bg-black/70 text-white hover:bg-black/10'
-                            : 'bg-white/30 text-neutral-900 hover:bg-neutral-600 hover:text-neutral-300'
+                            ? 'bg-black/40 text-white hover:bg-black/60'
+                            : 'bg-black/20 text-white hover:bg-black/40'
                     }
-
-    md:w-auto
-    md:h-auto
-    md:px-4
-    md:py-2
-    md:rounded-xl
-`}
+                    `}
                 >
                     {isAboutPage ? (
                         <>
-                            <X
-                                size={18}
-                                strokeWidth={2.5}
-                            />
-
-                            <span className="hidden sm:inline">
-                            Close About
-                        </span>
+                            <X size={18} strokeWidth={2.5} className="text-white/70 shrink-0" />
+                            <span className="hidden md:inline text-sm font-semibold tracking-tight">Close</span>
                         </>
                     ) : (
                         <>
-                            <Info
-                                size={18}
-                                strokeWidth={2.5}
-                            />
-
-                            <span className="hidden sm:inline">
-                            About
-                        </span>
+                            <Info size={18} strokeWidth={2.5} className="text-white/70 shrink-0" />
+                            <span className="hidden md:inline text-sm font-semibold tracking-tight">About</span>
                         </>
                     )}
                 </button>
             </div>
 
 
-            {/* MOBILE ELLIPSIS */}
+            {/* ============================================== */}
+            {/* MOBILE ELLIPSIS & MENU */}
+            {/* ============================================== */}
             <div ref={menuRef} className="relative md:hidden translate-x-4">
                 <button
                     onClick={() => {
@@ -243,9 +320,7 @@ export default function Navbar({
                 backdrop-blur-2xl
             "
                     >
-                        {/* ===================================== */}
                         {/* VIEW 1: MAIN MENU */}
-                        {/* ===================================== */}
                         {activeView === 'main' && (
                             <div className="flex flex-col w-full animate-in slide-in-from-left-2 duration-200">
                                 {/* ABOUT */}
@@ -311,12 +386,32 @@ export default function Navbar({
                                     </div>
                                     <ChevronRight size={18} className="text-white/50 shrink-0"/>
                                 </button>
+
+                                {/* LANGUAGE (DRILL-DOWN TRIGGER) */}
+                                <button
+                                    onClick={() => setActiveView('language')}
+                                    className="
+                                        flex items-center justify-between
+                                        px-5 py-4 w-full
+                                        text-left transition-all hover:bg-white/10
+                                    "
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex w-5 justify-center items-center">
+                                            <Languages size={18} className="text-white/70" />
+                                        </div>
+
+                                        <span className="text-white font-semibold tracking-tight uppercase">
+                                            {language}
+                                        </span>
+
+                                    </div>
+                                    <ChevronRight size={18} className="text-white/50 shrink-0"/>
+                                </button>
                             </div>
                         )}
 
-                        {/* ===================================== */}
                         {/* VIEW 2: REGION SUBMENU */}
-                        {/* ===================================== */}
                         {activeView === 'region' && (
                             <div className="flex flex-col w-full animate-in slide-in-from-right-2 duration-200">
 
@@ -353,7 +448,6 @@ export default function Navbar({
                                                 key={item.id}
                                                 onClick={() => {
                                                     setCountry(item.id as never)
-                                                    // Close entirely when a selection is made
                                                     setIsMenuOpen(false)
                                                     setTimeout(() => setActiveView('main'), 200)
                                                 }}
@@ -361,11 +455,7 @@ export default function Navbar({
                                                     flex items-center gap-3 w-full
                                                     px-5 py-3
                                                     transition-all duration-200
-                                                    ${
-                                                    active
-                                                        ? 'bg-white/10'
-                                                        : 'hover:bg-white/5'
-                                                }
+                                                    ${active ? 'bg-white/10' : 'hover:bg-white/5'}
                                                 `}
                                             >
                                                 <div className="flex w-5 justify-center items-center shrink-0">
@@ -383,8 +473,71 @@ export default function Navbar({
                                         )
                                     })}
                                 </div>
+                            </div>
+                        )}
 
-                                {/* Future-proofing: Space for Language Selector here */}
+                        {/* VIEW 3: LANGUAGE SUBMENU */}
+                        {activeView === 'language' && (
+                            <div className="flex flex-col w-full animate-in slide-in-from-right-2 duration-200">
+
+                                {/* BACK BUTTON */}
+                                <button
+                                    onClick={() => setActiveView('main')}
+                                    className="
+                                        flex items-center gap-2
+                                        px-4 py-3.5
+                                        text-left text-white/60 font-semibold text-sm
+                                        transition-all hover:bg-white/10 hover:text-white
+                                    "
+                                >
+                                    <ChevronLeft size={18} className="shrink-0"/>
+                                    <span>Settings</span>
+                                </button>
+
+                                <div className="h-px w-full bg-white/10" />
+
+                                {/* HEADER */}
+                                <div className="px-5 py-2">
+                                    <span className="text-[11px] font-bold text-white/40 uppercase tracking-wider">
+                                        Select Language
+                                    </span>
+                                </div>
+
+                                {/* LANGUAGE OPTIONS (WITH SCROLL) */}
+                                <div className="flex flex-col pb-1 max-h-[50vh] overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">
+                                    {languages.map((item) => {
+                                        const active = language === item.id
+
+                                        return (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => {
+                                                    setLanguage(item.id)
+                                                    setIsMenuOpen(false)
+                                                    setTimeout(() => setActiveView('main'), 200)
+                                                }}
+                                                className={`
+                                                    flex items-center justify-between w-full
+                                                    px-5 py-3
+                                                    transition-all duration-200
+                                                    ${active ? 'bg-white/10' : 'hover:bg-white/5'}
+                                                `}
+                                            >
+                                                <span
+                                                    className={`
+                                                        text-sm tracking-tight flex items-center gap-2
+                                                        ${active ? 'text-amber-400 font-bold' : 'text-white/80 font-medium'}
+                                                    `}
+                                                >
+                                                    {item.label}
+                                                    <span className="opacity-50 text-xs font-normal">
+                                                        ({item.native})
+                                                    </span>
+                                                </span>
+                                            </button>
+                                        )
+                                    })}
+                                </div>
                             </div>
                         )}
                     </div>
