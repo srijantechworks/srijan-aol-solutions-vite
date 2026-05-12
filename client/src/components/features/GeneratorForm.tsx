@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 
 // @ts-ignore
-import {DROPDOWN_OPTIONS} from '@/lib/constants'
+import {DROPDOWN_OPTIONS} from '@/constants/dropdown'
 import CustomSelect from '@/components/ui/CustomSelect'
 
 export default function GeneratorForm() {
@@ -407,7 +407,7 @@ ${
                                     DROPDOWN_OPTIONS.audiences
                                 }
                                 value={selections.audience}
-                                onChange={(val) =>
+                                onChange={(val: string) =>
                                     handleSelectChange(
                                         'audience',
                                         val,
@@ -419,7 +419,7 @@ ${
                                 label="Message Tone"
                                 options={DROPDOWN_OPTIONS.tones}
                                 value={selections.tone}
-                                onChange={(val) =>
+                                onChange={(val: string) =>
                                     handleSelectChange(
                                         'tone',
                                         val,
@@ -431,7 +431,7 @@ ${
                                 label="Message Length"
                                 options={DROPDOWN_OPTIONS.lengths}
                                 value={selections.length}
-                                onChange={(val) =>
+                                onChange={(val: string) =>
                                     handleSelectChange(
                                         'length',
                                         val,
@@ -445,7 +445,7 @@ ${
                                     DROPDOWN_OPTIONS.benefits
                                 }
                                 value={selections.benefit}
-                                onChange={(val) =>
+                                onChange={(val: string) =>
                                     handleSelectChange(
                                         'benefit',
                                         val,
@@ -457,7 +457,7 @@ ${
                                 label="Emoji Level"
                                 options={DROPDOWN_OPTIONS.emojis}
                                 value={selections.emoji}
-                                onChange={(val) =>
+                                onChange={(val: string) =>
                                     handleSelectChange(
                                         'emoji',
                                         val,

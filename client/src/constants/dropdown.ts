@@ -1,5 +1,3 @@
-// lib/constants.ts
-
 export const DROPDOWN_OPTIONS = {
     audiences: [
         { value: 'none', label: "None" },

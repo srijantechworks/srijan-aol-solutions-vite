@@ -276,6 +276,21 @@ export default function Navbar({
                     Whispering Infinity
                 </span>
                         </button>
+
+
+                        {/* COUNTRY SELECT */}
+                        <button
+                            // onClick={handleInfinityRedirect}
+                            className="
+                    flex items-center gap-3
+                    px-5 py-4
+                    text-left text-violet-300 font-semibold
+                    transition-all
+                    hover:bg-white/10
+                "
+                        >
+                            🌍 Region
+                        </button>
                     </div>
                 )}
             </div>
