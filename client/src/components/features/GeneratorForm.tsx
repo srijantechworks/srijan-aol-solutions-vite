@@ -302,7 +302,7 @@ export default function GeneratorForm() {
                                     if (apiResult)
                                         setApiResult(null)
                                 }}
-                                placeholder="Paste any aolt.in or artofliving.org course link..."
+                                placeholder="paste any aolt.in or artofliving.online course link..."
                                 className="w-full rounded-2xl border border-white/30 bg-white/90 text-neutral-900 text-base md:text-lg py-4 pl-12 pr-5 shadow-lg outline-none transition-all focus:ring-2 focus:ring-amber-300"
                             />
                         </div>
@@ -325,17 +325,17 @@ export default function GeneratorForm() {
                             type="button"
                             onClick={handleToggleOptions}
 
-                            className={`w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl px-6 py-4 font-medium transition-all
+                            className={`w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl px-6 py-4 font-semibold transition-all
 
 ${
                                 isActionDisabled
-                                    ? 'cursor-not-allowed opacity-60'
+                                    ? 'cursor-not-allowed opacity-60 text-neutral-600'
                                     : 'cursor-pointer'
                             }
 
 ${
                                 showAdvanced
-                                    ? 'bg-red-500 text-white shadow-lg hover:bg-red-600'
+                                    ? 'bg-indigo-500 text-white shadow-lg hover:bg-indigo-700'
                                     : 'border border-white/30 bg-white/80 text-neutral-800 hover:bg-white'
                             }
 `}
@@ -364,7 +364,7 @@ ${
 
 ${
                                     isActionDisabled
-                                        ? 'cursor-not-allowed bg-neutral-300 text-neutral-500 opacity-60'
+                                        ? 'cursor-not-allowed bg-neutral-300 text-neutral-600 opacity-60'
                                         : 'cursor-pointer bg-amber-500 text-white hover:bg-amber-600'
                                 }
 `}

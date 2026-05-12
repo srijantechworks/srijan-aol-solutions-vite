@@ -4,25 +4,23 @@ import GeneratorForm from '../components/features/GeneratorForm'
 
 export default function HomePage() {
     return (
-        <div className="flex min-h-full flex-col items-center justify-start px-4 pt-28 pb-28 text-center md:pt-24">
+        <div className="flex min-h-full flex-col items-center justify-start px-4 pb-28 text-center md:pt-24">
             {/* TOP BADGE */}
             <div
                 className="
-                    mb-6 inline-flex items-center gap-2
+                    mb-2 inline-flex items-center gap-2
                     rounded-full
-                    border border-neutral-200
-                    bg-white/80
-                    px-5 py-2
-                    text-sm font-medium
-                    text-neutral-700
-                    shadow-sm
-                    backdrop-blur-lg
+                    border border-white/10 bg-white/10
+                    px-4 py-1
+                    text-xs md:text-sm font-medium
+                    text-white/80
+                    backdrop-blur-xl
                 "
             >
-                <Sparkles className="h-4 w-4 text-amber-500"/>
+                <Sparkles className="h-4 w-4 text-amber-300"/>
 
                 <span>
-                    For Art of Living teachers & volunteers across the globe
+                    For Art of Living teachers & volunteers
                 </span>
             </div>
 
@@ -31,7 +29,7 @@ export default function HomePage() {
                 className="
                     max-w-5xl
                     text-4xl font-black tracking-tight
-                    text-neutral-900
+                    text-neutral-800
                     sm:text-3xl
                     lg:text-5xl
                 "
@@ -59,12 +57,11 @@ export default function HomePage() {
                     mt-6 mb-10
                     max-w-4xl
                     text-base leading-relaxed
-                    text-neutral-100
+                    text-neutral-50 font-semibold
                     sm:text-xl
                 "
             >
-                Paste an Art of Living course link and we’ll craft three
-                beautiful, WhatsApp-ready messages you can share in seconds.
+                Paste your Art of Living course link and we’ll craft beautiful, WhatsApp-ready messages you can share in seconds.
             </p>
 
             {/* FORM */}

@@ -4,7 +4,6 @@ import {
     MessageSquare,
     Image as ImageIcon,
     BookOpen,
-    Infinity,
     Users,
 } from 'lucide-react'
 
@@ -32,12 +31,6 @@ export default function MobileBottomNav() {
             color: 'blue',
         },
         {
-            name: 'Infinity',
-            href: '/whisperity-infinity',
-            icon: Infinity,
-            color: 'violet',
-        },
-        {
             name: 'CRM',
             href: '/crm',
             icon: Users,
@@ -58,7 +51,7 @@ export default function MobileBottomNav() {
 
     md:hidden
 ">
-            <div className="flex items-center justify-between px-2 py-2 pb-safe">
+            <div className="flex items-center justify-between px-1 py-2 pb-safe">
                 {items.map((item) => {
                     const Icon = item.icon
 
@@ -74,11 +67,6 @@ export default function MobileBottomNav() {
                             icon: 'text-sky-500',
                             text: 'text-sky-500',
                             bg: 'bg-sky-500/15',
-                        },
-                        violet: {
-                            icon: 'text-violet-500',
-                            text: 'text-violet-500',
-                            bg: 'bg-violet-500/15',
                         },
                         emerald: {
                             icon: 'text-emerald-500',
@@ -110,8 +98,8 @@ export default function MobileBottomNav() {
         relative
         flex flex-col items-center justify-center
         gap-1
-        rounded-l-full rounded-r-full
-        min-w-[68px] max-w-[82px] py-1.5
+        rounded-full
+        min-w-[80px] max-w-[84px] py-1.5
         transition-all duration-300 -translate-y-[1px]
     "
                             >
@@ -121,10 +109,10 @@ export default function MobileBottomNav() {
                 absolute
                 inset-x-0
                 inset-y-0
-                -translate-y-[2.75px]
+                -translate-y-[2.70px]
                 rounded-l-full rounded-r-full
                 -z-10
-                shadow-lg
+                shadow-xl
                 ${styles.bg}
             `}
                                     />
