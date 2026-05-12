@@ -45,29 +45,29 @@ export default function KnowledgePage() {
     }
 
     return (
-        <div className="relative min-h-full overflow-hidden px-4 pb-28 pt-24 sm:px-6 lg:px-12">
-            {/* BACKDROP GLOW */}
-            <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                <div
-                    className="absolute left-1/2 top-[-180px] h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-amber-400/10 blur-3xl"/>
-                <div
-                    className="absolute bottom-[-200px] right-[-120px] h-[400px] w-[400px] rounded-full bg-violet-400/10 blur-3xl"/>
-            </div>
-
-            <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-8">
+        <div className="relative min-h-full overflow-hidden px-4 pb-28 md:pt-24 sm:px-6 lg:px-12">
+            <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-4">
                 {/* HERO */}
                 <div className="text-center">
                     <div
-                        className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur-xl">
+                        className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-1 text-xs md:text-sm font-medium text-white/80 backdrop-blur-xl">
                         <Sparkles className="h-4 w-4 text-amber-300"/>
                         Wisdom • Reflection • Random Discovery
                     </div>
 
-                    <h1 className="text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
+                    <h1
+                        className="
+                    max-w-5xl
+                    text-4xl font-black tracking-tight
+                    text-neutral-800
+                    sm:text-3xl
+                    lg:text-5xl
+                "
+                    >
                         Knowledge Sheet
                     </h1>
 
-                    <p className="mx-auto mt-5 max-w-3xl text-base leading-relaxed text-white/70 sm:text-lg">
+                    <p className="mx-auto mt-5 max-w-3xl text-base font-semibold leading-relaxed text-white sm:text-lg">
                         Instantly open any knowledge sheet page or let Srijan randomly surface a timeless insight for
                         you.
                     </p>
@@ -217,8 +217,6 @@ export default function KnowledgePage() {
         </div>
     )
 }
-
-
 
 
 // #
