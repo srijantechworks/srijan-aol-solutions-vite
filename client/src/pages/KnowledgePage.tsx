@@ -9,7 +9,9 @@ import {
     ArrowRight,
     AlertCircle,
     Loader2,
-    ChevronLeft
+    ChevronLeft,
+    Copy,
+    Check
 } from 'lucide-react'
 
 export default function KnowledgePage() {
@@ -25,6 +27,7 @@ export default function KnowledgePage() {
     // UI States
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [isCopied, setIsCopied] = useState(false) // <-- State for copy feedback
 
     // Mobile-specific routing states
     const [mobileTab, setMobileTab] = useState<'specific' | 'random'>('specific')
@@ -42,6 +45,7 @@ export default function KnowledgePage() {
     const fetchPageFromDB = async (targetPage: number) => {
         setIsLoading(true)
         setError(null)
+        setIsCopied(false) // Reset copy state on new fetch
 
         try {
             // NOTE: Replace this URL with your actual backend API route
@@ -132,8 +136,56 @@ export default function KnowledgePage() {
         }
     }
 
+    // Handle copying the text from HTML safely preserving layout
+    const handleCopy = async () => {
+        if (!pageData?.html) return
+
+        try {
+            // Create a temporary element to strip HTML but keep natural line breaks (innerText)
+            const tempDiv = document.createElement('div')
+            tempDiv.innerHTML = pageData.html
+            const plainText = tempDiv.innerText || tempDiv.textContent || ''
+            const textToCopy = plainText.trim()
+
+            // Modern browsers in secure contexts (HTTPS/Localhost)
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(textToCopy)
+            } else {
+                // Fallback for HTTP testing on local network IPs (e.g. 192.168.1.x)
+                const textArea = document.createElement("textarea")
+                textArea.value = textToCopy
+                textArea.style.position = "absolute"
+                textArea.style.left = "-999999px"
+                document.body.prepend(textArea)
+                textArea.select()
+                try {
+                    document.execCommand('copy')
+                } catch (error) {
+                    console.error('Fallback copy failed', error)
+                } finally {
+                    textArea.remove()
+                }
+            }
+
+            setIsCopied(true)
+            setTimeout(() => setIsCopied(false), 2000) // Revert to copy icon after 2s
+        } catch (err) {
+            console.error("Failed to copy text: ", err)
+        }
+    }
+
     return (
         <div className="relative min-h-full overflow-hidden px-2 pb-28 md:pt-24 sm:px-6 lg:px-12">
+
+            {/* FLOATING TOAST NOTIFICATION
+                top-20 for Mobile (Top), md:top-auto md:bottom-24 for Desktop (Bottom) */}
+            {isCopied && (
+                <div className="fixed top-20 md:top-auto md:bottom-24 left-1/2 z-50 flex -translate-x-1/2 transform whitespace-nowrap items-center gap-2 rounded-full bg-neutral-800 px-5 py-3 text-sm font-medium text-white shadow-2xl transition-all duration-300 animate-in fade-in zoom-in-95">
+                    <Check className="h-5 w-5 text-green-400" />
+                    Knowledge copied to clipboard!
+                </div>
+            )}
+
             <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-6 md:gap-8">
 
                 {/* HERO: Hidden on mobile when Reader is open to save screen space */}
@@ -245,13 +297,13 @@ export default function KnowledgePage() {
 
                 {/* DB TEXT VIEWER / MAIN CONTAINER
                     (Hidden on mobile if reading route is not active, always visible on desktop) */}
-                <div className={`mx-auto w-full max-w-4xl overflow-hidden rounded-xl md:rounded-[24px] border border-white/10 bg-black/20 shadow-[0_20px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl mt-2 md:mt-0 ${isMobileReaderOpen ? 'block' : 'hidden md:block'}`}>
+                <div className={`mx-auto w-full max-w-4xl overflow-hidden rounded-xl md:rounded-[24px] border border-white/10 bg-black/20 shadow-[0_20px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl md:mt-0 ${isMobileReaderOpen ? 'block' : 'hidden md:block'}`}>
 
                     {/* MOBILE BACK BUTTON (Visible only on mobile inside the reader) */}
                     <div className="md:hidden flex items-center border-b border-white/10 bg-black/20 p-2">
                         <button
                             onClick={() => setIsMobileReaderOpen(false)}
-                            className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white/70 transition-colors hover:text-white active:bg-white/10"
+                            className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white/80 transition-colors border hover:text-white active:bg-white/10"
                         >
                             <ChevronLeft className="h-5 w-5" />
                             Back to Menu
@@ -274,40 +326,59 @@ export default function KnowledgePage() {
                                 </div>
                             </div>
 
-                            {/* Right: Desktop Controls (Hidden on Mobile) */}
-                            <div className="hidden md:flex items-center gap-3">
-                                <div className="relative flex flex-col justify-center">
-                                    <input
-                                        type="number"
-                                        min={MIN_PAGE}
-                                        max={MAX_PAGE}
-                                        placeholder="Page #..."
-                                        value={pageNumber}
-                                        onChange={(e) => handleInputChange(e.target.value)}
-                                        onKeyDown={handleKeyDown}
-                                        className={`h-11 w-32 rounded-xl border bg-black/20 px-4 text-sm font-semibold text-white outline-none transition-all placeholder:text-white/35 focus:bg-black/30 ${
-                                            error ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-amber-400/50'
-                                        }`}
-                                    />
-                                    <span className="absolute -bottom-4 left-2 text-[10px] font-medium text-white/50">
-                                        Range: {MIN_PAGE} - {MAX_PAGE}
-                                    </span>
+                            {/* Right: Actions & Desktop Controls */}
+                            <div className="flex items-center gap-2 md:gap-3">
+
+                                {/* COPY BUTTON: Visible on Desktop & Mobile if a page is loaded */}
+                                {activePage && pageData && (
+                                    <button
+                                        onClick={handleCopy}
+                                        className="flex h-10 w-10 md:h-11 cursor-pointer md:w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/70 transition-all hover:bg-white/15 hover:text-white active:scale-95"
+                                        title="Copy text"
+                                    >
+                                        {isCopied ? (
+                                            <Check className="h-4 w-4 md:h-5 md:w-5 text-green-400" />
+                                        ) : (
+                                            <Copy className="h-4 w-4 md:h-5 md:w-5" />
+                                        )}
+                                    </button>
+                                )}
+
+                                {/* Desktop Controls (Hidden on Mobile) */}
+                                <div className="hidden md:flex items-center gap-3 ml-2 md:ml-0">
+                                    <div className="relative flex flex-col justify-center">
+                                        <input
+                                            type="number"
+                                            min={MIN_PAGE}
+                                            max={MAX_PAGE}
+                                            placeholder="Page #..."
+                                            value={pageNumber}
+                                            onChange={(e) => handleInputChange(e.target.value)}
+                                            onKeyDown={handleKeyDown}
+                                            className={`h-11 w-32 rounded-xl border bg-black/20 px-4 text-sm font-semibold text-white outline-none transition-all placeholder:text-white/35 focus:bg-black/30 ${
+                                                error ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-amber-400/50'
+                                            }`}
+                                        />
+                                        <span className="absolute -bottom-4 left-2 text-[10px] font-medium text-white/50">
+                                            Range: {MIN_PAGE} - {MAX_PAGE}
+                                        </span>
+                                    </div>
+                                    <button
+                                        onClick={handleLoadPage}
+                                        disabled={isLoading || !pageNumber}
+                                        className="flex h-11 items-center cursor-pointer justify-center gap-2 rounded-xl bg-amber-500 px-5 text-sm font-bold text-white transition-all hover:bg-amber-400 active:scale-95 disabled:opacity-50"
+                                    >
+                                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin"/> : "Open"}
+                                    </button>
+                                    <button
+                                        onClick={handleRandomPage}
+                                        disabled={isLoading}
+                                        className="flex h-11 items-center justify-center cursor-pointer gap-2 rounded-xl border border-white/10 bg-white/10 px-4 text-sm font-bold text-white transition-all hover:bg-white/20 active:scale-95 disabled:opacity-50"
+                                    >
+                                        <Shuffle className="h-4 w-4 text-amber-300"/>
+                                        Surprise Me
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={handleLoadPage}
-                                    disabled={isLoading || !pageNumber}
-                                    className="flex h-11 items-center cursor-pointer justify-center gap-2 rounded-xl bg-amber-500 px-5 text-sm font-bold text-white transition-all hover:bg-amber-400 active:scale-95 disabled:opacity-50"
-                                >
-                                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin"/> : "Open"}
-                                </button>
-                                <button
-                                    onClick={handleRandomPage}
-                                    disabled={isLoading}
-                                    className="flex h-11 items-center justify-center cursor-pointer gap-2 rounded-xl border border-white/10 bg-white/10 px-4 text-sm font-bold text-white transition-all hover:bg-white/20 active:scale-95 disabled:opacity-50"
-                                >
-                                    <Shuffle className="h-4 w-4 text-amber-300"/>
-                                    Surprise Me
-                                </button>
                             </div>
                         </div>
 
