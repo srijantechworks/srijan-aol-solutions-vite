@@ -278,7 +278,7 @@ export default function GeneratorForm() {
         <>
             <form
                 onSubmit={handleGenerate}
-                className="w-full max-w-6xl mx-auto flex flex-col items-center px-4 sm:px-6 pb-10 space-y-6"
+                className="w-full max-w-5xl mx-auto flex flex-col items-center px-4 sm:px-6 pb-10 space-y-6"
             >
                 {/* INPUT + ACTIONS */}
                 <div className="w-full flex flex-col xl:flex-row gap-4 items-stretch xl:items-start">

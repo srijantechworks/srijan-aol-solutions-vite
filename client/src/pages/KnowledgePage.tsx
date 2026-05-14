@@ -8,7 +8,8 @@ import {
     Sparkles,
     ArrowRight,
     AlertCircle,
-    Loader2
+    Loader2,
+    ChevronLeft
 } from 'lucide-react'
 
 export default function KnowledgePage() {
@@ -24,6 +25,10 @@ export default function KnowledgePage() {
     // UI States
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+
+    // Mobile-specific routing states
+    const [mobileTab, setMobileTab] = useState<'specific' | 'random'>('specific')
+    const [isMobileReaderOpen, setIsMobileReaderOpen] = useState(false)
 
     // The actual valid knowledge sheet boundaries
     const MIN_PAGE = 1
@@ -49,6 +54,9 @@ export default function KnowledgePage() {
             const data = await response.json()
             setPageData(data)
             setActivePage(targetPage)
+
+            // "Route" to the reader view on mobile upon success
+            setIsMobileReaderOpen(true)
         } catch (err) {
             setError("Could not load this page. Please try again.")
             console.error(err)
@@ -69,6 +77,12 @@ export default function KnowledgePage() {
         } else if (parsed > MAX_PAGE) {
             parsed = MAX_PAGE
             setPageNumber(MAX_PAGE.toString())
+        }
+
+        // Avoid re-fetching if we already have the exact same page loaded
+        if (parsed === activePage && pageData) {
+            setIsMobileReaderOpen(true)
+            return
         }
 
         fetchPageFromDB(parsed)
@@ -119,10 +133,11 @@ export default function KnowledgePage() {
     }
 
     return (
-        <div className="relative min-h-full overflow-hidden px-1.5 pb-28 md:pt-24 sm:px-6 lg:px-12">
+        <div className="relative min-h-full overflow-hidden px-2 pb-28 md:pt-24 sm:px-6 lg:px-12">
             <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-6 md:gap-8">
-                {/* HERO */}
-                <div className="text-center md:pt-0">
+
+                {/* HERO: Hidden on mobile when Reader is open to save screen space */}
+                <div className={`text-center md:pt-0 ${isMobileReaderOpen ? 'hidden md:block' : 'block md:mt-0'}`}>
                     <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-1 text-xs md:text-sm font-medium text-white/80 backdrop-blur-xl">
                         <Sparkles className="h-4 w-4 text-amber-300"/>
                         Wisdom • Reflection • Random Discovery
@@ -137,14 +152,117 @@ export default function KnowledgePage() {
                     </p>
                 </div>
 
-                {/* DB TEXT VIEWER / MAIN CONTAINER */}
-                <div className="mx-auto w-full max-w-4xl overflow-hidden rounded-xl md:rounded-[24px] border border-white/10 bg-black/20 shadow-[0_20px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl mt-4 md:mt-0">
+                {/* MOBILE "PSEUDO-ROUTE" TABS MENU (Hidden on Desktop, Hidden if Mobile Reader is Open) */}
+                <div className={`md:hidden mx-auto w-full max-w-md flex-col gap-4 mt-2 ${isMobileReaderOpen ? 'hidden' : 'flex'}`}>
+
+                    {/* Tab Switcher */}
+                    <div className="flex rounded-2xl bg-black/20 p-1.5 backdrop-blur-md border border-white/5">
+                        <button
+                            onClick={() => { setMobileTab('specific'); setError(null); }}
+                            className={`flex-1 rounded-xl py-3 text-sm font-bold transition-all duration-300 ${mobileTab === 'specific' ? 'bg-white/15 text-white shadow-md' : 'text-white/50 hover:text-white/80'}`}
+                        >
+                            Open Specific
+                        </button>
+                        <button
+                            onClick={() => { setMobileTab('random'); setError(null); }}
+                            className={`flex-1 rounded-xl py-3 text-sm font-bold transition-all duration-300 ${mobileTab === 'random' ? 'bg-white/15 text-white shadow-md' : 'text-white/50 hover:text-white/80'}`}
+                        >
+                            Surprise Me
+                        </button>
+                    </div>
+
+                    {/* Tab Content: Specific Page */}
+                    {mobileTab === 'specific' && (
+                        <div className="flex flex-col gap-5 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl shadow-2xl">
+                            <div className="text-center">
+                                <h2 className="text-lg font-bold text-white">Specific Page</h2>
+                                <p className="mt-1 text-xs text-white/60">Enter a page number to begin reading.</p>
+                            </div>
+
+                            <div className="relative flex flex-col items-center">
+                                <input
+                                    type="number"
+                                    min={MIN_PAGE}
+                                    max={MAX_PAGE}
+                                    placeholder="Page #"
+                                    value={pageNumber}
+                                    onChange={(e) => handleInputChange(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    className={`h-14 w-full rounded-2xl border bg-black/20 px-5 text-center text-lg font-bold text-white outline-none transition-all placeholder:text-white/35 focus:bg-black/40 ${
+                                        error ? 'border-red-500/50' : 'border-white/10 focus:border-amber-400/50'
+                                    }`}
+                                />
+                                <span className="absolute -bottom-5 text-[11px] font-medium text-white/50">
+                                    Valid Range: {MIN_PAGE} to {MAX_PAGE}
+                                </span>
+                            </div>
+
+                            <button
+                                onClick={handleLoadPage}
+                                disabled={isLoading || !pageNumber}
+                                className="mt-4 flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-amber-500 text-base font-bold text-white transition-all active:scale-95 disabled:opacity-50"
+                            >
+                                {isLoading ? <Loader2 className="h-5 w-5 animate-spin"/> : (
+                                    <>Open Page <ArrowRight className="h-5 w-5"/></>
+                                )}
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Tab Content: Random Wisdom */}
+                    {mobileTab === 'random' && (
+                        <div className="flex flex-col gap-5 rounded-3xl border border-white/10 bg-gradient-to-br from-violet-500/10 to-amber-400/5 p-6 backdrop-blur-xl shadow-2xl">
+                            <div className="text-center">
+                                <h2 className="text-lg font-bold text-white">Random Discovery</h2>
+                                <p className="mt-1 text-xs text-white/60">Let Srijan find a timeless insight for you.</p>
+                            </div>
+
+                            <div className="flex justify-center py-4 text-violet-300">
+                                <Shuffle className="h-12 w-12 opacity-80" />
+                            </div>
+
+                            <button
+                                onClick={handleRandomPage}
+                                disabled={isLoading}
+                                className="mt-2 flex h-14 w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/10 text-base font-bold text-white transition-all hover:bg-white/20 active:scale-95 disabled:opacity-50"
+                            >
+                                {isLoading ? <Loader2 className="h-5 w-5 animate-spin"/> : (
+                                    <>Surprise Me <Shuffle className="h-4 w-4"/></>
+                                )}
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Mobile Error Message */}
+                    {error && (
+                        <div className="flex items-center justify-center gap-1.5 text-sm font-medium text-red-400 mt-2">
+                            <AlertCircle className="h-4 w-4 shrink-0"/>
+                            <span>{error}</span>
+                        </div>
+                    )}
+                </div>
+
+
+                {/* DB TEXT VIEWER / MAIN CONTAINER
+                    (Hidden on mobile if reading route is not active, always visible on desktop) */}
+                <div className={`mx-auto w-full max-w-4xl overflow-hidden rounded-xl md:rounded-[24px] border border-white/10 bg-black/20 shadow-[0_20px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl mt-2 md:mt-0 ${isMobileReaderOpen ? 'block' : 'hidden md:block'}`}>
+
+                    {/* MOBILE BACK BUTTON (Visible only on mobile inside the reader) */}
+                    <div className="md:hidden flex items-center border-b border-white/10 bg-black/20 p-2">
+                        <button
+                            onClick={() => setIsMobileReaderOpen(false)}
+                            className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white/70 transition-colors hover:text-white active:bg-white/10"
+                        >
+                            <ChevronLeft className="h-5 w-5" />
+                            Back to Menu
+                        </button>
+                    </div>
 
                     {/* HEADER & DESKTOP CONTROLS */}
-                    <div className="flex flex-col gap-2 border-b border-white/10 px-3 py-3 sm:px-6 md:px-8 md:py-5">
+                    <div className="flex flex-col gap-2 border-b border-white/10 px-4 py-3 sm:px-6 md:px-8 md:py-5">
                         <div className="flex items-center justify-between">
                             {/* Left: Title Area */}
-                            <div className="flex items-center gap-2 md:gap-4">
+                            <div className="flex items-center gap-3 md:gap-4">
                                 <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl md:rounded-2xl bg-white/10 text-amber-300 shrink-0">
                                     <BookOpen className="h-5 w-5 md:h-6 md:w-6"/>
                                 </div>
@@ -163,7 +281,7 @@ export default function KnowledgePage() {
                                         type="number"
                                         min={MIN_PAGE}
                                         max={MAX_PAGE}
-                                        placeholder="Page #"
+                                        placeholder="Page #..."
                                         value={pageNumber}
                                         onChange={(e) => handleInputChange(e.target.value)}
                                         onKeyDown={handleKeyDown}
@@ -204,47 +322,12 @@ export default function KnowledgePage() {
                         )}
                     </div>
 
-                    {/* MOBILE-ONLY TEMPORARY CONTROLS (Will be replaced in Step 2) */}
-                    <div className="md:hidden mt-3 px-3 pb-3 flex flex-col gap-2">
-                        <div className="flex gap-2">
-                            <div className="relative flex-1 flex flex-col">
-                                <input
-                                    type="number"
-                                    min={MIN_PAGE}
-                                    max={MAX_PAGE}
-                                    placeholder="Page #..."
-                                    value={pageNumber}
-                                    onChange={(e) => handleInputChange(e.target.value)}
-                                    onKeyDown={handleKeyDown}
-                                    className={`h-11 w-full rounded-xl border bg-black/20 px-3 text-sm font-semibold text-white outline-none transition-all placeholder:text-white/35 focus:bg-black/30 ${
-                                        error ? 'border-red-500/50' : 'border-white/10 focus:border-amber-400/50'
-                                    }`}
-                                />
-                                <span className="absolute -bottom-4 left-1 text-[10px] font-medium text-white/50">
-                                    Range: {MIN_PAGE} - {MAX_PAGE}
-                                </span>
-                            </div>
-                            <button onClick={handleLoadPage} disabled={isLoading || !pageNumber} className="flex h-11 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white transition-all active:scale-95 disabled:opacity-50">
-                                {isLoading ? <Loader2 className="h-5 w-5 animate-spin"/> : <ArrowRight className="h-5 w-5"/>}
-                            </button>
-                            <button onClick={handleRandomPage} disabled={isLoading} className="flex h-11 w-12 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-amber-300 transition-all hover:bg-white/20 active:scale-95 disabled:opacity-50">
-                                {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-white"/> : <Shuffle className="h-5 w-5"/>}
-                            </button>
-                        </div>
-                        {error && (
-                            <div className="flex items-center gap-1.5 text-xs font-medium text-red-400 pl-1 mt-3">
-                                <AlertCircle className="h-3 w-3 shrink-0"/>
-                                <span>{error}</span>
-                            </div>
-                        )}
-                    </div>
-
                     {/* TEXT BODY CONTAINER */}
                     <div className="relative w-full overflow-x-auto bg-[#F1ECE2] px-5 py-8 sm:px-12 sm:py-12 md:px-16 md:py-16 text-black/85">
                         {isLoading ? (
                             <div className="flex min-h-[400px] flex-col items-center justify-center text-black">
                                 <Loader2 className="h-10 w-10 md:h-12 md:w-12 animate-spin text-amber-500 mb-4"/>
-                                <p className="text-sm md:text-base">Fetching wisdom from the database...</p>
+                                <p className="text-sm md:text-base font-medium">Fetching wisdom from the database...</p>
                             </div>
                         ) : activePage && pageData ? (
                             <div
