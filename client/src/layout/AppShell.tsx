@@ -82,6 +82,24 @@ export default function AppShell({
                     <Navbar isSidebarCollapsed={isSidebarCollapsed}/>
 
                     <main
+                        id="app-scroll-container"
+                          onScroll={(e) => {
+                              sessionStorage.setItem(
+                                  'app-scroll-top',
+                                  e.currentTarget.scrollTop.toString()
+                              )
+                          }}
+                          ref={(el) => {
+                              if (!el) return
+
+                              const saved = sessionStorage.getItem(
+                                  'app-scroll-top'
+                              )
+
+                              if (saved) {
+                                  el.scrollTop = Number(saved)
+                              }
+                          }}
                         className={`
         flex-1 overflow-y-auto overflow-x-hidden
         pb-24 md:pb-0

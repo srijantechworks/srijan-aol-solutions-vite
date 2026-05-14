@@ -24,6 +24,15 @@ router.get('/', async (req: Request, res: Response) => {
             });
         }
 
+        /**
+         * Enterprise Caching Headers:
+         * public: Cacheable by any cache (browser, CDN).
+         * max-age=3600: Browser caches for 1 hour.
+         * s-maxage=86400: CDN (CloudFront/Cloudflare) caches for 24 hours.
+         * stale-while-revalidate=3600: Serve stale content while fetching fresh in background.
+         */
+        res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=3600');
+
         // Returns { PK, SK, text, html, ... }
         res.json(pageData);
 
