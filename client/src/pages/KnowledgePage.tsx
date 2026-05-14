@@ -80,7 +80,7 @@ export default function KnowledgePage() {
     }
 
     return (
-        <div className="relative min-h-full overflow-hidden px-2 pb-28 md:pt-24 sm:px-6 lg:px-12">
+        <div className="relative min-h-full overflow-hidden px-1.5 pb-28 md:pt-24 sm:px-6 lg:px-12">
             <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-6 md:gap-8">
                 {/* HERO */}
                 <div className="text-center md:pt-0">
