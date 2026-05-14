@@ -5,10 +5,20 @@ import {
     UpdateCommand,
     PutCommand
 } from '@aws-sdk/lib-dynamodb';
+import { LRUCache } from 'lru-cache';
 
 // Placeholder for your metrics service - adjust path if necessary
 // import { trackMetric } from './metrics';
 const trackMetric = (name: string, data: any) => console.log(`Metric: ${name}`, data);
+
+// ==========================================
+// Cache Configuration (Enterprise Grade)
+// ==========================================
+const knowledgeCache = new LRUCache<string, any>({
+    max: 500, // Store up to 500 pages (max is 366, so this is safe)
+    ttl: 1000 * 60 * 60 * 24, // 24 Hours
+    updateAgeOnGet: true, // Refresh TTL on access
+});
 
 // 1. Initialize the Client
 // In Node.js/Express, we use process.env.
@@ -35,10 +45,20 @@ const DYNAMODB_DOC_ID = process.env.DYNAMODB_DOC_ID || 'ainttss';
 // ==========================================
 
 /**
- * Fetches a specific styled page from the Knowledge Sheet table
+ * Fetches a specific styled page from the Knowledge Sheet table with local LRU caching.
  */
 export async function fetchKnowledgePage(sheetNumber: number) {
+    const cacheKey = `page_${sheetNumber}`;
+
+    // 1. Check Local Cache
+    const cachedItem = knowledgeCache.get(cacheKey);
+    if (cachedItem) {
+        console.log(`[Cache] ✅ Hit for Page ${sheetNumber}`);
+        return cachedItem;
+    }
+
     try {
+        console.log(`[Cache] ❌ Miss for Page ${sheetNumber}. Fetching from DynamoDB...`);
         const command = new GetCommand({
             TableName: DYNAMODB_KNOWLEDGE_TABLE,
             Key: {
@@ -48,7 +68,14 @@ export async function fetchKnowledgePage(sheetNumber: number) {
         });
 
         const response = await docClient.send(command);
-        return response.Item;
+        const item = response.Item;
+
+        // 2. Update Cache if item exists
+        if (item) {
+            knowledgeCache.set(cacheKey, item);
+        }
+
+        return item;
     } catch (error) {
         console.error("❌ DynamoDB Knowledge Fetch Error:", error);
         throw error;
