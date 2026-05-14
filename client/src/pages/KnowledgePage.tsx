@@ -241,7 +241,7 @@ export default function KnowledgePage() {
                     </div>
 
                     {/* TEXT BODY CONTAINER */}
-                    <div className="relative w-full overflow-x-auto bg-[#FDFBF7] px-5 py-8 sm:px-12 sm:py-12 md:px-16 md:py-16 text-black/90">
+                    <div className="relative w-full overflow-x-auto bg-[#F1ECE2] px-5 py-8 sm:px-12 sm:py-12 md:px-16 md:py-16 text-black/85">
                         {isLoading ? (
                             <div className="flex min-h-[400px] flex-col items-center justify-center text-black">
                                 <Loader2 className="h-10 w-10 md:h-12 md:w-12 animate-spin text-amber-500 mb-4"/>
