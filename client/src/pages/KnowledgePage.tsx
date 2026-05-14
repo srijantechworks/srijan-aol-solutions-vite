@@ -27,8 +27,8 @@ export default function KnowledgePage() {
     const [error, setError] = useState<string | null>(null)
 
     // The actual valid knowledge sheet boundaries
-    const MIN_PAGE = 17
-    const MAX_PAGE = 675
+    const MIN_PAGE = 1
+    const MAX_PAGE = 366
 
     const randomPage = useMemo(() => {
         return Math.floor(Math.random() * (MAX_PAGE - MIN_PAGE + 1)) + MIN_PAGE
@@ -196,20 +196,22 @@ export default function KnowledgePage() {
                     </div>
 
                     {/* TEXT BODY */}
-                    <div className="relative min-h-[50vh] w-full overflow-x-hidden bg-white px-4 py-8 sm:px-16 sm:py-10 text-black">
+                    <div className="relative w-full overflow-x-hidden bg-white px-4 py-8 sm:px-16 sm:py-10 text-black">
                         {isLoading ? (
-                            <div className="flex h-full min-h-[400px] flex-col items-center justify-center text-black/50">
+                            <div className="flex min-h-[400px] flex-col items-center justify-center text-black/50">
                                 <Loader2 className="h-12 w-12 animate-spin text-amber-500 mb-4" />
                                 <p>Fetching wisdom from the database...</p>
                             </div>
                         ) : activePage && pageData ? (
-                            // FIXED 4: Added max-sm:[&_*]:!text-sm to strictly override hardcoded DB styles on mobile
+                            // FIXED: Added a regex replacement to dynamically strip trailing <br>, empty spaces, and &nbsp; from the end of the HTML string before injecting it.
                             <div
                                 className="mx-auto w-full max-w-3xl break-words font-serif text-sm leading-relaxed sm:text-base md:text-lg [&_*]:max-w-full max-sm:[&_*]:!text-sm max-sm:[&_*]:!leading-relaxed"
-                                dangerouslySetInnerHTML={{ __html: pageData.html }}
+                                dangerouslySetInnerHTML={{
+                                    __html: pageData.html.replace(/(<br\s*\/?>|&nbsp;|\s)+$/gi, '')
+                                }}
                             />
                         ) : (
-                            <div className="flex h-full min-h-[400px] flex-col items-center justify-center text-center">
+                            <div className="flex min-h-[400px] flex-col items-center justify-center text-center">
                                 <div className="flex h-24 w-24 items-center justify-center rounded-[28px] border border-black/10 bg-black/5 text-amber-500 shadow-xl">
                                     <BookOpen className="h-12 w-12"/>
                                 </div>
