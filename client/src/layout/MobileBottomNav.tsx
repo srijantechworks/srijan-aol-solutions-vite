@@ -43,12 +43,12 @@ export default function MobileBottomNav() {
     fixed bottom-2 left-1.5 right-1.5 z-50
 
     rounded-full
-    bg-neutral-700/30
+    bg-neutral-700/90
     backdrop-blur-3xl
 
     shadow-2xl
-    border border-neutral-800/50
 
+    shadow-white/20
     md:hidden
 ">
             <div className="flex items-center justify-between px-1 py-2 pb-safe">
@@ -109,10 +109,11 @@ export default function MobileBottomNav() {
                 absolute
                 inset-x-0
                 inset-y-0
-                -translate-y-[2.70px]
+                -translate-y-[2.75px]
                 rounded-l-full rounded-r-full
                 -z-10
-                shadow-xl
+                shadow-2xl
+            
                 ${styles.bg}
             `}
                                     />
