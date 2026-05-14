@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import {createBrowserRouter, Outlet} from 'react-router-dom'
 
 import AppShell from './layout/AppShell'
 
@@ -6,32 +6,32 @@ import HomePage from './pages/HomePage'
 import AboutPage from './pages/AboutPage'
 import KnowledgePage from './pages/KnowledgePage'
 
-export const router =
-    createBrowserRouter([
-        {
-            path: '/',
-            element: (
-                <AppShell>
-                    <HomePage />
-                </AppShell>
-            ),
-        },
+function RootLayout() {
+    return (
+        <AppShell>
+            <Outlet/>
+        </AppShell>
+    )
+}
 
-        {
-            path: '/about',
-            element: (
-                <AppShell>
-                    <AboutPage />
-                </AppShell>
-            ),
-        },
+export const router = createBrowserRouter([
+    {
+        path: '/',
+        element: <RootLayout/>,
+        children: [
+            {
+                index: true,
+                element: <HomePage/>,
+            },
+            {
+                path: 'about',
+                element: <AboutPage/>,
+            },
+            {
+                path: 'knowledge',
+                element: <KnowledgePage/>
 
-        {
-            path: '/knowledge',
-            element: (
-                <AppShell>
-                    <KnowledgePage />
-                </AppShell>
-            ),
-        },
-    ])
+            },
+        ],
+    },
+])

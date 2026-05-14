@@ -1,4 +1,5 @@
-import {useMemo, useState} from 'react'
+import {useMemo, useState, useEffect} from 'react'
+import {useLocation} from 'react-router-dom'
 import {
     BookOpen,
     Shuffle,
@@ -29,6 +30,8 @@ export default function KnowledgePage() {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [isMobileControlsOpen, setIsMobileControlsOpen] = useState(false)
+
+    const location = useLocation()
 
     // The actual valid knowledge sheet boundaries
     const MIN_PAGE = 1
@@ -79,6 +82,43 @@ export default function KnowledgePage() {
         fetchPageFromDB(randomPage)
     }
 
+    useEffect(() => {
+        const restoreState = () => {
+            const savedPage = sessionStorage.getItem(
+                'knowledge-active-page'
+            )
+
+            const savedPageData = sessionStorage.getItem(
+                'knowledge-page-data'
+            )
+
+            if (savedPage && savedPageData) {
+                requestAnimationFrame(() => {
+                    setActivePage(Number(savedPage))
+                    setPageNumber(savedPage)
+                    setPageData(JSON.parse(savedPageData))
+                })
+            }
+        }
+
+        restoreState()
+    }, [])
+
+    useEffect(() => {
+        if (activePage && pageData) {
+            sessionStorage.setItem(
+                'knowledge-active-page',
+                activePage.toString()
+            )
+
+            sessionStorage.setItem(
+                'knowledge-page-data',
+                JSON.stringify(pageData)
+            )
+        }
+    }, [activePage, pageData])
+
+
     return (
         <div className="relative min-h-full overflow-hidden px-1.5 pb-28 md:pt-24 sm:px-6 lg:px-12">
             <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-6 md:gap-8">
@@ -113,7 +153,7 @@ export default function KnowledgePage() {
                 </div>
 
                 {/* CONTROLS (Accordion on Mobile, Grid on Desktop) */}
-                <div className={`mx-auto w-full max-w-5xl grid-cols-1 gap-5 lg:grid-cols-[1.2fr_0.8fr] ${isMobileControlsOpen ? 'grid' : 'hidden md:grid'}`}>
+                <div className={`mx-auto w-full max-w-4xl grid-cols-1 gap-5 lg:grid-cols-[1.2fr_0.8fr] ${isMobileControlsOpen ? 'grid' : 'hidden md:grid'}`}>
                     {/* PAGE PICKER */}
                     <div className="rounded-3xl border border-white/10 bg-white/10 p-5 shadow-2xl backdrop-blur-2xl sm:p-6">
                         <div className="flex items-start gap-4">
@@ -189,7 +229,7 @@ export default function KnowledgePage() {
                 </div>
 
                 {/* DB TEXT VIEWER */}
-                <div className="mx-auto w-full max-w-5xl overflow-hidden rounded-2xl md:rounded-[32px] border border-white/10 bg-black/20 shadow-[0_20px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl md:mt-0 mt-2">
+                <div className="mx-auto w-full max-w-4xl overflow-hidden rounded-2xl md:rounded-[32px] border border-white/10 bg-black/20 shadow-[0_20px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl md:mt-0 mt-2">
                     <div className="flex flex-col gap-2 border-b border-white/10 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 md:px-8 md:py-5">
                         <div className="flex items-center gap-2 md:gap-4">
                             <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl md:rounded-2xl bg-white/10 text-amber-300 shrink-0">
