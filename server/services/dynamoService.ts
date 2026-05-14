@@ -37,13 +37,13 @@ const DYNAMODB_DOC_ID = process.env.DYNAMODB_DOC_ID || 'ainttss';
 /**
  * Fetches a specific styled page from the Knowledge Sheet table
  */
-export async function fetchKnowledgePage(pageNumber: number) {
+export async function fetchKnowledgePage(sheetNumber: number) {
     try {
         const command = new GetCommand({
             TableName: DYNAMODB_KNOWLEDGE_TABLE,
             Key: {
                 "document_id": DYNAMODB_DOC_ID,
-                "page_number": pageNumber
+                "sheet_number": sheetNumber
             }
         });
 
